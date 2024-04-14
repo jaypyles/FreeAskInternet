@@ -1,10 +1,14 @@
 services:
   backend:
-    image: docker.io/nashsu/free_ask_internet:latest
+    # image: docker.io/nashsu/free_ask_internet:latest
+    build:
+      context: .
+    container_name: searchbackend
     depends_on:
       - llm-freegpt35
     restart: on-failure
- 
+    networks:
+      - search
 
   freeaskinternet-ui:
     image: docker.io/nashsu/free_ask_internet_ui:latest
@@ -16,22 +20,30 @@ services:
       - backend
     restart: always
 
+    networks:
+      - search
+
   chatgpt-next-web:
     image: yidadaa/chatgpt-next-web
     ports:
       - "3030:3000"
     environment:
       OPENAI_API_KEY: "FreeAskInternet"
-      # CODE: "FreeAskInternet" # 如果你想要设置页面的访问密码，请修改这里
       BASE_URL: "http://backend:8000"
       CUSTOM_MODELS: "-all,+gpt-3.5-turbo"
     depends_on:
       - llm-freegpt35
     restart: always
 
+    networks:
+      - search
+
   llm-freegpt35:
     image: missuo/freegpt35:latest
     restart: always
+
+    networks:
+      - search
 
   llm-kimi:
     image: vinlic/kimi-free-api:latest
@@ -39,18 +51,26 @@ services:
     environment:
       - TZ=Asia/Shanghai
 
+    networks:
+      - search
+
   llm-glm4:
     image: vinlic/glm-free-api:latest
     restart: always
     environment:
       - TZ=Asia/Shanghai
 
+    networks:
+      - search
 
   llm-qwen:
     image: vinlic/qwen-free-api:latest
     restart: always
     environment:
       - TZ=Asia/Shanghai
+
+    networks:
+      - search
 
   searxng:
     image: docker.io/searxng/searxng:latest
@@ -65,8 +85,15 @@ services:
       - SETGID
       - SETUID
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '1m'
-        max-file: '1'
+        max-size: "1m"
+        max-file: "1"
     restart: always
+    networks:
+      - search
+
+networks:
+  search:
+    external:
+      name: search
