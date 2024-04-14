@@ -10,64 +10,9 @@ services:
     networks:
       - search
 
-  freeaskinternet-ui:
-    image: docker.io/nashsu/free_ask_internet_ui:latest
-    ports:
-      - "3000:80"
-    environment:
-      BACKEND_HOST: "backend:8000"
-    depends_on:
-      - backend
-    restart: always
-
-    networks:
-      - search
-
-  chatgpt-next-web:
-    image: yidadaa/chatgpt-next-web
-    ports:
-      - "3030:3000"
-    environment:
-      OPENAI_API_KEY: "FreeAskInternet"
-      BASE_URL: "http://backend:8000"
-      CUSTOM_MODELS: "-all,+gpt-3.5-turbo"
-    depends_on:
-      - llm-freegpt35
-    restart: always
-
-    networks:
-      - search
-
   llm-freegpt35:
     image: missuo/freegpt35:latest
     restart: always
-
-    networks:
-      - search
-
-  llm-kimi:
-    image: vinlic/kimi-free-api:latest
-    restart: always
-    environment:
-      - TZ=Asia/Shanghai
-
-    networks:
-      - search
-
-  llm-glm4:
-    image: vinlic/glm-free-api:latest
-    restart: always
-    environment:
-      - TZ=Asia/Shanghai
-
-    networks:
-      - search
-
-  llm-qwen:
-    image: vinlic/qwen-free-api:latest
-    restart: always
-    environment:
-      - TZ=Asia/Shanghai
 
     networks:
       - search
