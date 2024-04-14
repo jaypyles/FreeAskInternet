@@ -1,30 +1,12 @@
-# -*- coding: utf-8 -*-
-
-import concurrent
-import getopt
-import json
-import os
-import platform
-import sys
 import time
-import urllib.parse
-from concurrent.futures import ThreadPoolExecutor
-from contextlib import asynccontextmanager
-from datetime import datetime
-from pprint import pprint
-from typing import Any, Dict, List, Literal, Optional, Union
-from urllib.parse import urlparse
+from typing import List, Literal, Optional, Union
 
-import openai
-import requests
-import trafilatura
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from sse_starlette.sse import EventSourceResponse, ServerSentEvent
-from trafilatura import bare_extraction
+from sse_starlette.sse import EventSourceResponse
 
 import free_ask_internet
 
