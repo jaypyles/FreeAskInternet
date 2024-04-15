@@ -1,6 +1,5 @@
 services:
   backend:
-    # image: docker.io/nashsu/free_ask_internet:latest
     build:
       context: .
     container_name: searchbackend
@@ -9,9 +8,6 @@ services:
     depends_on:
       - llm-freegpt35
     restart: on-failure
-
-    # ports:
-    #   - 8000:8000
     networks:
       - search
 
@@ -19,9 +15,6 @@ services:
     container_name: llm-freegpt35
     image: missuo/freegpt35:latest
     restart: always
-    # ports:
-    #   - 3040:3040
-
     networks:
       - search
 

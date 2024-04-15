@@ -104,7 +104,6 @@ class SearchResp(BaseModel):
 
 @app.get("/v1/models", response_model=ModelList)
 async def list_models():
-    global model_args
     model_card = ModelCard(id="gpt-3.5-turbo")
     return ModelList(data=[model_card])
 

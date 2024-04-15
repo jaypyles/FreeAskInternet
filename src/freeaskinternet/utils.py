@@ -41,7 +41,6 @@ def search_web_ref(query: str):
                         url_parsed.scheme + "://" + url_parsed.netloc + "/favicon.ico"
                     )
                     site_name = tldextract.extract(url).domain
-
                 conv_links.append(
                     {
                         "site_name": site_name,
