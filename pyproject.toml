@@ -1,7 +1,7 @@
 [project]
 name = "FreeAskInternet"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Better engineered version of the FreeAskInternet (only the API) tool, empowering developers to build apps which integrate AI/Searchxng. "
 authors = [
     {name = "Jayden Pyles", email = "jpylesbuisness@gmail.com"},
 ]
