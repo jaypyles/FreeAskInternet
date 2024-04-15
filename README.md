@@ -17,6 +17,7 @@ url = "http://searchbackend:8000/v1/chat/completions"
 response = requests.post(url, json=body)
 ```
 
+This is a STREAMED response, so the data is being sent in the response as it is generated, and will need to be parsed for use.
 Response:
 ```
 The Moon creates tides through its gravitational pull on Earth's oceans, causing bulges on the side facing the Moon and the side opposite it, resulting in high tides.
@@ -34,6 +35,27 @@ Citations:
 4. https://www.timeanddate.com/astronomy/moon/tides.html
 5. https://oceanservice.noaa.gov/education/tutorial_tides/tides06_variations.html
 ```
+
+Example of how I parse the data being received:
+```python
+  response_text = response.text
+  data_chunks = response_text.split("\n")
+  total_content = ""
+  for chunk in data_chunks:
+      if chunk:
+          clean_json = chunk.replace("data: ", "")
+          try:
+              if clean_json:
+                  dict_data = json.loads(clean_json)
+                  token = dict_data["choices"][0]["delta"].get("content", "")
+                  if token:
+                      total_content += token
+          except json.JSONDecodeError as e:
+              print(f"Failed to decode JSON: {e} - Chunk: {clean_json}")
+
+  return total_content
+```
+
 
 ## Credits
 
