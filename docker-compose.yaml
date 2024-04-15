@@ -4,9 +4,12 @@ services:
     build:
       context: .
     container_name: searchbackend
+    command:
+      ["pdm", "run", "uvicorn", "freeaskinternet.app:app", "--host", "0.0.0.0"]
     depends_on:
       - llm-freegpt35
     restart: on-failure
+
     # ports:
     #   - 8000:8000
     networks:

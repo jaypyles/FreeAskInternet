@@ -8,7 +8,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
-import free_ask_internet
+from freeaskinternet.utils import (ask_internet, chat, gen_prompt,
+                                   search_web_ref)
 
 app = FastAPI()
 
@@ -132,7 +133,7 @@ def predict(query: str, history: None, model_id: str):
     yield "{}".format(chunk.json(exclude_unset=True))
     new_response = ""
     current_length = 0
-    for token in free_ask_internet.ask_internet(query=query):
+    for token in ask_internet(query=query):
         new_response += token
         if len(new_response) == current_length:
             continue
@@ -166,7 +167,7 @@ async def get_search_refs(request: QueryRequest):
     search_results = []
     search_item_list = []
     if request.ask_type == "search":
-        search_links, search_results = free_ask_internet.search_web_ref(request.query)
+        search_links, search_results = search_web_ref(request.query)
         for search_item in search_links:
             snippet = search_item.get("snippet")
             url = search_item.get("url")
@@ -200,13 +201,12 @@ def generator(
         yield "搜索失败，没有返回结果"
     else:
         total_token = ""
-        for token in free_ask_internet.chat(
+        for token in chat(
             prompt=prompt,
             model=model,
             llm_auth_token=llm_auth_token,
             llm_base_url=llm_base_url,
             using_custom_llm=using_custom_llm,
-            stream=True,
         ):
             total_token += token
             yield token
@@ -238,10 +238,9 @@ async def stream(search_uuid: str, request: QueryRequest):
         while limit_count > 0:
             try:
                 if len(search_results) > 0:
-                    prompt = free_ask_internet.gen_prompt(
+                    prompt = gen_prompt(
                         request.query,
                         search_results,
-                        lang=request.lang,
                         context_length_limit=8000,
                     )
                     break
@@ -274,11 +273,7 @@ async def stream(search_uuid: str, request: QueryRequest):
 
 
 def main():
-
     port = 8000
-
-    search_results = []
-
     uvicorn.run(app, host="0.0.0.0", port=port, workers=1)
 
 

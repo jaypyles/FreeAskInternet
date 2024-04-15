@@ -167,11 +167,10 @@ def chat(
 
     response = requests.post(openai.base_url, json=data, headers=headers)
     response = response.text
-    data_chunks = response.split("\n")  # use the actual delimiter if different
+    data_chunks = response.split("\n")
 
     total_content = ""
     for chunk in data_chunks:
-        print(f"Chunk: {chunk}")
         clean_json = chunk.replace("data: ", "")
         if chunk:
             dict_data = json.loads(clean_json)
@@ -189,7 +188,6 @@ def ask_internet(query: str):
     for token in chat(prompt=prompt):
         if token:
             total_token += token
-            print(f"TOTAL TOKEN: {total_token}")
             yield token
     yield "\n\n"
     if True:

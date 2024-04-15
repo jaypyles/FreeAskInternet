@@ -1,9 +1,12 @@
-FROM python:3.9.15
+FROM python:slim
+
+RUN pip install --upgrade pip && pip install pdm
+RUN apt update
+RUN apt install -y uvicorn
 
 WORKDIR /app
-COPY requirements.txt /app
-RUN pip3 install  -i https://mirrors.aliyun.com/pypi/simple/  --trusted-host mirrors.aliyun.com  -r requirements.txt --no-cache-dir
-COPY . /app 
+COPY pyproject.toml /app/pyproject.toml
+COPY pdm.lock /app/pdm.lock
+COPY ./src/freeaskinternet /app/freeaskinternet
+RUN pdm install
 EXPOSE 8000
-ENTRYPOINT ["python3"] 
-CMD ["server.py"]
