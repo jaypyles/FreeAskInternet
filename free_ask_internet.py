@@ -87,7 +87,7 @@ def gen_prompt(question: str, content_list: list, context_length_limit=11000):
         content_list = content_list[1]
 
     print(content_list.__class__)
-    ref_content = [item.get("content") for item in content_list]
+    ref_content = [item.get("content") for item in content_list[:5]]
 
     answer_language = " English "
 
@@ -106,7 +106,6 @@ def gen_prompt(question: str, content_list: list, context_length_limit=11000):
         ref_index = 1
 
         for ref_text in ref_content:
-
             prompts = (
                 prompts + "\n\n" + " [citation:{}]  ".format(str(ref_index)) + ref_text
             )
@@ -121,7 +120,10 @@ def gen_prompt(question: str, content_list: list, context_length_limit=11000):
             Above is the reference contexts. Remember, don't repeat the context word for word. Answer in """
             + answer_language
             + """. If the response is lengthy, structure it in paragraphs and summarize where possible. Cite the context using the format [citation:x] where x is the reference number. If a sentence originates from multiple contexts, list all relevant citation numbers, like [citation:3][citation:5]. Don't cluster the citations at the end but include them in the answer where they correspond.
-            Remember, don't blindly repeat the contexts verbatim. And here is the user question:
+            Remember, don't blindly repeat the contexts verbatim. 
+            Guarantee every generated response is 1000 characters or less, if you have to shorten your citations please do. But they MUST be 1500 characters or less.
+            Only cite a max of 5 things.
+            And here is the user question:
             """
             + question
         )
@@ -192,11 +194,10 @@ def ask_internet(query: str):
     yield "\n\n"
     if True:
         yield "---"
-        yield "\n"
-        yield "参考资料:\n"
+        yield "Citaions:\n"
         count = 1
-        for url_content in content_list:
-            for url_c in url_content:
+        for url_content in content_list[:1]:
+            for url_c in url_content[:5]:
                 url = url_c.get("url")
                 yield "*[{}. {}]({})*".format(str(count), url, url)
                 yield "\n"
