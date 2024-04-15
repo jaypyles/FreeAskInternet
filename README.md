@@ -10,7 +10,7 @@ FreeAskInternet is a completely free, private and locally running search aggrega
 ```python
 body = {
   "model": "gpt3.5",
-  "messages": [{"role": "user", "content": "}],
+  "messages": [{"role": "user", "content": "Why does the moon create the tides"}],
 }
 
 url = "http://searchbackend:8000/v1/chat/completions"
