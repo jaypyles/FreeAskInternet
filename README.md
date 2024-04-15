@@ -19,7 +19,12 @@ response = requests.post(url, json=body)
 
 Response:
 ```
-The Moon creates tides through its gravitational pull on Earth's oceans, causing bulges on the side facing the Moon and the side opposite it, resulting in high tides. The low points correspond to low tides [citation:1][citation:2]. These tides occur due to the gravitational forces between the Moon and Earth, leading to the ocean's surface rising and falling regularly [citation:1]. While the Moon and Earth's gravitational interaction primarily drives tides, other factors, such as the shape of Earth, its geography, and the depth of the ocean, also influence tidal patterns [citation:1]. Additionally, the timing of high and low tide events varies by location due to factors like the continental shelf's slope, leading to lag times of hours or even close to a day [citation:1]. NOAA utilizes advanced equipment to monitor tides in over 3,000 locations in the U.S. [citation:1].
+The Moon creates tides through its gravitational pull on Earth's oceans, causing bulges on the side facing the Moon and the side opposite it, resulting in high tides.
+The low points correspond to low tides [citation:1][citation:2]. These tides occur due to the gravitational forces between the Moon and Earth,
+leading to the ocean's surface rising and falling regularly [citation:1]. While the Moon and Earth's gravitational interaction primarily drives tides, other factors,
+such as the shape of Earth, its geography, and the depth of the ocean, also influence tidal patterns [citation:1]. Additionally, the timing of high and low tide events
+varies by location due to factors like the continental shelf's slope, leading to lag times of hours or even close to a day [citation:1].
+NOAA utilizes advanced equipment to monitor tides in over 3,000 locations in the U.S. [citation:1].
 
 ---
 Citations:
