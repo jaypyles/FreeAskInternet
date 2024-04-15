@@ -1,21 +1,22 @@
 services:
   backend:
+    image: jpyles0524/freeaskinternetapi:latest
     build:
       context: .
     container_name: searchbackend
     depends_on:
       - llm-freegpt35
+    ports:
+      - 8888:8000
     restart: on-failure
     networks:
       - search
-
   llm-freegpt35:
     container_name: llm-freegpt35
     image: missuo/freegpt35:latest
     restart: always
     networks:
       - search
-
   searxng:
     image: docker.io/searxng/searxng:latest
     volumes:
@@ -36,7 +37,6 @@ services:
     restart: always
     networks:
       - search
-
 networks:
   search:
     external:

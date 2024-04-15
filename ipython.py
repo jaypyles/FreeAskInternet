@@ -13,7 +13,7 @@ def main():
             }
         ],
     }
-    response = requests.post("http://localhost:8000/v1/chat/completions", json=body)
+    response = requests.post("http://localhost:8888/v1/chat/completions", json=body)
     response_text = response.text
     data_chunks = response_text.split("\n")
 
