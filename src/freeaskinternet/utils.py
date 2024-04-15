@@ -77,7 +77,11 @@ def search_web_ref(query: str):
         raise ex
 
 
-def gen_prompt(question: str, content_list: tuple | list, context_length_limit=11000):
+def gen_prompt(
+    question: str,
+    content_list: tuple | list,
+    context_length_limit=11000,
+):
     limit_len = context_length_limit - 2000
     if len(question) > limit_len:
         question = question[0:limit_len]
@@ -122,7 +126,6 @@ def gen_prompt(question: str, content_list: tuple | list, context_length_limit=1
             Cite the context using the format [citation:x] where x is the reference number. If a sentence originates from multiple contexts, list all relevant citation numbers, like [citation:3][citation:5]. 
             Don't cluster the citations at the end but include them in the answer where they correspond.
             Remember, don't blindly repeat the contexts verbatim.
-            Only cite a max of 5 things.
             And here is the user question:
             """
             + question
@@ -182,7 +185,7 @@ def chat(
                 yield token
 
 
-def ask_internet(query: str):
+def ask_internet(query: str, discord_friendly: Optional[bool] = False):
     content_list = search_web_ref(query)
     prompt = gen_prompt(query, content_list, context_length_limit=6000)
     total_token = ""
@@ -192,14 +195,20 @@ def ask_internet(query: str):
             total_token += token
             yield token
 
+    content_list = content_list[0]
+
     yield "\n\n"
     if True:
         yield "---\n"
         yield "Citations:\n"
         count = 1
-        for url_content in content_list[:1]:
-            for url_c in url_content[:5]:
-                url = url_c.get("url")
-                yield "*[{}. {}]({})*".format(str(count), url, url)
-                yield "\n"
-                count += 1
+
+        iterable_content = content_list
+        if discord_friendly:
+            iterable_content = content_list[:5]
+
+        for url_c in iterable_content:
+            url = url_c.get("url")
+            yield "*[{}. {}]({})*".format(str(count), url, url)
+            yield "\n"
+            count += 1

@@ -61,6 +61,7 @@ class ChatCompletionRequest(BaseModel):
     top_p: Optional[float] = None
     max_length: Optional[int] = None
     stream: Optional[bool] = False
+    discord_friendly: Optional[bool] = False
 
 
 class ChatCompletionResponseChoice(BaseModel):
@@ -115,11 +116,11 @@ async def create_chat_completion(request: ChatCompletionRequest):
         raise HTTPException(status_code=400, detail="Invalid request")
     query = request.messages[-1].content
 
-    generate = predict(query, request.model)
+    generate = predict(query, request.model, request.discord_friendly)
     return EventSourceResponse(generate, media_type="text/event-stream")
 
 
-def predict(query: str, model_id: str):
+def predict(query: str, model_id: str, discord_friendly: Optional[bool] = False):
     choice_data = ChatCompletionResponseStreamChoice(
         index=0, delta=DeltaMessage(role="assistant"), finish_reason=None
     )
@@ -130,7 +131,7 @@ def predict(query: str, model_id: str):
     new_response = ""
     current_length = 0
 
-    for token in ask_internet(query=query):
+    for token in ask_internet(query=query, discord_friendly=discord_friendly):
         new_response += token
         if len(new_response) == current_length:
             continue
