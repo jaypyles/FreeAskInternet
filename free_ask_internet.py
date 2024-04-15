@@ -193,8 +193,8 @@ def ask_internet(query: str):
             yield token
     yield "\n\n"
     if True:
-        yield "---"
-        yield "Citaions:\n"
+        yield "---\n"
+        yield "Citations:\n"
         count = 1
         for url_content in content_list[:1]:
             for url_c in url_content[:5]:
