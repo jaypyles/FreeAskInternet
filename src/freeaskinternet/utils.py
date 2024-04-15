@@ -81,6 +81,7 @@ def gen_prompt(
     question: str,
     content_list: tuple | list,
     context_length_limit=11000,
+    discord_friendly: Optional[bool] = False,
 ):
     limit_len = context_length_limit - 2000
     if len(question) > limit_len:
@@ -97,7 +98,7 @@ def gen_prompt(
         prompts = (
             """
             You are a large language AI assistant. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
-            Your answer must be correct, accurate and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens. Do not give any information that is not related to the question, and do not repeat. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
+            Your answer must be correct, accurate and written by an expert using an unbiased and professional tone.  Do not give any information that is not related to the question, and do not repeat. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
 
             Please cite the contexts with the reference numbers, in the format [citation:x]. If a sentence comes from multiple contexts, please list all applicable citations, like [citation:3][citation:5]. Other than code and specific names and citations, your answer must be written in the same language as the question.
             Here are the set of contexts:
@@ -105,6 +106,10 @@ def gen_prompt(
             + "\n\n"
             + "```"
         )
+
+        if discord_friendly:
+            prompts += "Guarantee all responses are 1024 tokens or less."
+
         ref_index = 1
 
         for ref_text in ref_content:
@@ -187,7 +192,12 @@ def chat(
 
 def ask_internet(query: str, discord_friendly: Optional[bool] = False):
     content_list = search_web_ref(query)
-    prompt = gen_prompt(query, content_list, context_length_limit=6000)
+    prompt = gen_prompt(
+        query,
+        content_list,
+        context_length_limit=6000,
+        discord_friendly=discord_friendly,
+    )
     total_token = ""
 
     for token in chat(prompt=prompt):
