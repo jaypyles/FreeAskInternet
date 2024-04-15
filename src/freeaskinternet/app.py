@@ -116,7 +116,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         raise HTTPException(status_code=400, detail="Invalid request")
     query = request.messages[-1].content
 
-    generate = predict(query, "", request.model)
+    generate = predict(query, request.model)
     return EventSourceResponse(generate, media_type="text/event-stream")
 
 
