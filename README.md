@@ -6,7 +6,18 @@ This is a fork of the original FreeAskInternet, but only the backend, re-enginee
 
 FreeAskInternet is a completely free, private and locally running search aggregator & answer generate using LLM, Without GPU needed. The user can ask a question and the system will use searxng to make a multi engine search and combine the search result to the ChatGPT3.5 LLM and generate the answer based on search results. All process running locally and No GPU or OpenAI or Google API keys are needed.
 
+## Deployment Guide
+
+```bash
+git clone https://github.com/jaypyles/FreeAskInternet-API.git
+cd FreeAskInternet-API
+make build up
+```
+
+This deployment relies on a docker network called search. Which can be made through `docker network create search`.
+
 ## Example Usage
+
 ```python
 body = {
   "model": "gpt3.5",
@@ -20,6 +31,7 @@ response = requests.post(url, json=body)
 This is a STREAMED response, so the data is being sent in the response as it is generated, and will need to be parsed for use.
 
 Response:
+
 ```
 The Moon creates tides through its gravitational pull on Earth's oceans, causing bulges on the side facing the Moon and the side opposite it, resulting in high tides.
 The low points correspond to low tides [citation:1][citation:2]. These tides occur due to the gravitational forces between the Moon and Earth,
@@ -38,6 +50,7 @@ Citations:
 ```
 
 Example of how I parse the data being received:
+
 ```python
   response_text = response.text
   data_chunks = response_text.split("\n")
@@ -56,7 +69,6 @@ Example of how I parse the data being received:
 
   return total_content
 ```
-
 
 ## Credits
 
