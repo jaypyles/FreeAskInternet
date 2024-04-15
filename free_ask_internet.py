@@ -1,6 +1,8 @@
 import concurrent
+import json
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 from urllib.parse import urlparse
 
 import openai
@@ -77,11 +79,14 @@ def search_web_ref(query: str):
 
 
 def gen_prompt(question: str, content_list: list, context_length_limit=11000):
-
     limit_len = context_length_limit - 2000
     if len(question) > limit_len:
         question = question[0:limit_len]
 
+    if isinstance(content_list, tuple):
+        content_list = content_list[1]
+
+    print(content_list.__class__)
     ref_content = [item.get("content") for item in content_list]
 
     answer_language = " English "
@@ -128,15 +133,15 @@ def gen_prompt(question: str, content_list: list, context_length_limit=11000):
 
 def chat(
     prompt,
-    model: str,
-    llm_auth_token: str,
-    llm_base_url: str,
+    model: str = "gpt3.5",
+    llm_auth_token: Optional[str] = None,
+    llm_base_url: Optional[str] = None,
     using_custom_llm=False,
 ):
     openai.base_url = "http://127.0.0.1:3040/v1/"
 
     if model == "gpt3.5":
-        openai.base_url = "http://llm-freegpt35:3040/v1/"
+        openai.base_url = "http://llm-freegpt35:3040/v1/chat/completions"
 
     if llm_auth_token == "":  # TODO: Llama integration
         llm_auth_token = "CUSTOM"
@@ -147,29 +152,42 @@ def chat(
         openai.base_url = llm_base_url
         openai.api_key = llm_auth_token
 
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer any_string_you_like",
+    }
+
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": True,
+    }
+
+    response = requests.post(openai.base_url, json=data, headers=headers)
+    response = response.text
+    data_chunks = response.split("\n")  # use the actual delimiter if different
+
     total_content = ""
-    for chunk in openai.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        stream=True,
-        max_tokens=1024,
-        temperature=0.2,
-    ):
-        stream_resp = chunk.dict()
-        token = stream_resp["choices"][0]["delta"].get("content", "")
-        if token:
-            total_content += token
-            yield token
+    for chunk in data_chunks:
+        print(f"Chunk: {chunk}")
+        clean_json = chunk.replace("data: ", "")
+        if chunk:
+            dict_data = json.loads(clean_json)
+            token = dict_data["choices"][0]["delta"].get("content", "")
+            if token:
+                total_content += token
+                yield token
 
 
-def ask_internet(query: str, debug=False):
-    content_list = search_web_ref(query, debug=debug)
-    prompt = gen_prompt(query, content_list, context_length_limit=6000, debug=debug)
+def ask_internet(query: str):
+    content_list = search_web_ref(query)
+    prompt = gen_prompt(query, content_list, context_length_limit=6000)
     total_token = ""
 
     for token in chat(prompt=prompt):
         if token:
             total_token += token
+            print(f"TOTAL TOKEN: {total_token}")
             yield token
     yield "\n\n"
     if True:
@@ -178,7 +196,8 @@ def ask_internet(query: str, debug=False):
         yield "参考资料:\n"
         count = 1
         for url_content in content_list:
-            url = url_content.get("url")
-            yield "*[{}. {}]({})*".format(str(count), url, url)
-            yield "\n"
-            count += 1
+            for url_c in url_content:
+                url = url_c.get("url")
+                yield "*[{}. {}]({})*".format(str(count), url, url)
+                yield "\n"
+                count += 1

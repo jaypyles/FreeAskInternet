@@ -114,7 +114,6 @@ async def list_models():
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(request: ChatCompletionRequest):
     global model, tokenizer
-    print(request)
     if request.messages[-1].role != "user":
         raise HTTPException(status_code=400, detail="Invalid request")
     query = request.messages[-1].content
@@ -134,7 +133,6 @@ def predict(query: str, history: None, model_id: str):
     new_response = ""
     current_length = 0
     for token in free_ask_internet.ask_internet(query=query):
-
         new_response += token
         if len(new_response) == current_length:
             continue
@@ -187,7 +185,6 @@ async def get_search_refs(request: QueryRequest):
             search_item_list.append(si)
 
     resp = SearchResp(code=0, msg="success", data=search_item_list)
-
     return resp
 
 
@@ -273,7 +270,6 @@ async def stream(search_uuid: str, request: QueryRequest):
                 is_failed=True,
             )
 
-    # return EventSourceResponse(generate, media_type="text/event-stream")
     return StreamingResponse(generate, media_type="text/event-stream")
 
 
