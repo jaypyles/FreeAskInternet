@@ -8,7 +8,7 @@ from sse_starlette.sse import EventSourceResponse
 
 from freeaskinternet.utils import ask_internet, search_web_ref
 
-app = FastAPI()
+app = FastAPI(title="api")
 
 app.add_middleware(
     CORSMiddleware,
