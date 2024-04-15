@@ -18,6 +18,7 @@ response = requests.post(url, json=body)
 ```
 
 This is a STREAMED response, so the data is being sent in the response as it is generated, and will need to be parsed for use.
+
 Response:
 ```
 The Moon creates tides through its gravitational pull on Earth's oceans, causing bulges on the side facing the Moon and the side opposite it, resulting in high tides.
