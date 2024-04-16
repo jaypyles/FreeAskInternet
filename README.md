@@ -86,8 +86,6 @@ backend:
     - OLLAMA_HOST=http://ollama:11434
   depends_on:
     - llm-freegpt35
-  ports:
-    - 8888:8000
   restart: on-failure
   networks:
     - search
@@ -98,7 +96,7 @@ In the request you send to the API, change the model from `gpt3.5` to `ollama`, 
 ```python
 
 body = {
-  "model": "gpt3.5",
+  "model": "ollama",
   "messages": [{"role": "user", "content": "Why does the moon create the tides"}],
   "ollama_model": "llama2"
 }
