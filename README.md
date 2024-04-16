@@ -2,6 +2,8 @@
 
 This is a fork of the original FreeAskInternet, but only the backend, re-engineered to be more useful to build different apps (and in English).
 
+Now with Ollama support!
+
 ## What is FreeAskInternet
 
 FreeAskInternet is a completely free, private and locally running search aggregator & answer generate using LLM, Without GPU needed. The user can ask a question and the system will use searxng to make a multi engine search and combine the search result to the ChatGPT3.5 LLM and generate the answer based on search results. All process running locally and No GPU or OpenAI or Google API keys are needed.
@@ -69,6 +71,19 @@ Example of how I parse the data being received:
 
   return total_content
 ```
+
+## Ollama Guide
+
+In the docker-compose file, provide the environmental variables:
+`OLLAMA_HOST` and `OLLAMA_MODEL`.
+
+```
+environment:
+  - OLLAMA_HOST="http://localhost:11434"
+  - OLLAMA_MODEL="orca-mini"
+```
+
+In the request you send to the API, change the model from `gpt3.5` to `ollama`.
 
 ## Credits
 

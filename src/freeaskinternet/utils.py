@@ -1,14 +1,20 @@
 import concurrent
 import json
+import logging
+import os
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 from urllib.parse import urlparse
 
-import openai
 import requests
 import tldextract
 import trafilatura
+
+OLLAMA_HOST = os.getenv("OLLAMA_HOST")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
+
+LOG = logging.getLogger(__name__)
 
 
 def extract_url_content(url):
@@ -145,33 +151,26 @@ def gen_prompt(
 def chat(
     prompt,
     model: str = "gpt3.5",
-    llm_auth_token: Optional[str] = None,
-    llm_base_url: Optional[str] = None,
-    using_custom_llm=False,
 ):
     GPT_URL = ""
     if model == "gpt3.5":
         GPT_URL = "http://llm-freegpt35:3040/v1/chat/completions"
+        data = {
+            "model": "gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": True,
+        }
 
-    if llm_auth_token == "":  # TODO: Llama integration
-        llm_auth_token = "CUSTOM"
-
-    openai.api_key = llm_auth_token
-
-    if using_custom_llm:
-        GPT_URL = llm_base_url
-        openai.api_key = llm_auth_token
+    if model == "ollama":
+        GPT_URL = f"{OLLAMA_HOST}/api/generate"
+        data = {"model": OLLAMA_MODEL, "prompt": prompt}
 
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer a",
     }
 
-    data = {
-        "model": "gpt-3.5-turbo",
-        "messages": [{"role": "user", "content": prompt}],
-        "stream": True,
-    }
+    print(f"GPT URL: {GPT_URL}")
 
     assert GPT_URL
     response = requests.post(GPT_URL, json=data, headers=headers)

@@ -4,6 +4,9 @@ services:
     build:
       context: .
     container_name: searchbackend
+    environment:
+      - OLLAMA_HOST="http://localhost:11434"
+      - OLLAMA_MODEL="orca-mini"
     depends_on:
       - llm-freegpt35
     ports:
@@ -34,6 +37,16 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+    restart: always
+    networks:
+      - search
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    container_name: ollama
+    pull_policy: always
+    tty: true
     restart: always
     networks:
       - search

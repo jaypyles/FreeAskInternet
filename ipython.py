@@ -5,7 +5,7 @@ import requests
 
 def main():
     body = {
-        "model": "gpt3.5",
+        "model": "ollama",
         "messages": [
             {
                 "role": "user",
