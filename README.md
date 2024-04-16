@@ -74,8 +74,7 @@ Example of how I parse the data being received:
 
 ## Ollama Guide
 
-In the docker-compose file, provide the environmental variables:
-`OLLAMA_HOST` and `OLLAMA_MODEL`.
+In the docker-compose file, provide the environmental variable `OLLAMA_HOST`
 
 ```
 environment:
