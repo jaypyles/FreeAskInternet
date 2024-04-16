@@ -148,10 +148,7 @@ def gen_prompt(
     return prompts
 
 
-def chat(
-    prompt,
-    model: str = "gpt3.5",
-):
+def chat(prompt: str, model: str = "gpt3.5", ollama_model: Optional[str] = ""):
     GPT_URL = ""
     if model == "gpt3.5":
         GPT_URL = "http://llm-freegpt35:3040/v1/chat/completions"
@@ -163,14 +160,12 @@ def chat(
 
     if model == "ollama":
         GPT_URL = f"{OLLAMA_HOST}/api/generate"
-        data = {"model": OLLAMA_MODEL, "prompt": prompt}
+        data = {"model": ollama_model, "prompt": prompt}
 
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer a",
     }
-
-    print(f"GPT URL: {GPT_URL}")
 
     assert GPT_URL
     response = requests.post(GPT_URL, json=data, headers=headers)
@@ -183,13 +178,21 @@ def chat(
         clean_json = chunk.replace("data: ", "")
         if chunk:
             dict_data = json.loads(clean_json)
-            token = dict_data["choices"][0]["delta"].get("content", "")
+            if model == "gpt3.5":
+                token = dict_data["choices"][0]["delta"].get("content", "")
+            else:
+                token = dict_data["response"]
             if token:
                 total_content += token
                 yield token
 
 
-def ask_internet(query: str, discord_friendly: Optional[bool] = False):
+def ask_internet(
+    query: str,
+    model: str,
+    discord_friendly: Optional[bool] = False,
+    ollama_model: Optional[str] = "",
+):
     content_list = search_web_ref(query)
     prompt = gen_prompt(
         query,
@@ -199,7 +202,7 @@ def ask_internet(query: str, discord_friendly: Optional[bool] = False):
     )
     total_token = ""
 
-    for token in chat(prompt=prompt):
+    for token in chat(prompt=prompt, model=model, ollama_model=ollama_model):
         if token:
             total_token += token
             yield token

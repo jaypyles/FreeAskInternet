@@ -79,11 +79,20 @@ In the docker-compose file, provide the environmental variables:
 
 ```
 environment:
-  - OLLAMA_HOST="http://localhost:11434"
-  - OLLAMA_MODEL="orca-mini"
+  - OLLAMA_HOST=http://ollama:11434
 ```
 
-In the request you send to the API, change the model from `gpt3.5` to `ollama`.
+In the request you send to the API, change the model from `gpt3.5` to `ollama`, and provide the Ollama model name:
+
+```python
+
+body = {
+  "model": "gpt3.5",
+  "messages": [{"role": "user", "content": "Why does the moon create the tides"}],
+  "ollama_model": "llama2"
+}
+
+```
 
 ## Credits
 

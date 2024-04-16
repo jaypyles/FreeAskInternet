@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List, Literal, Optional, Union
 
@@ -7,6 +8,8 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from freeaskinternet.utils import ask_internet, search_web_ref
+
+LOG = logging.getLogger(__name__)
 
 app = FastAPI(title="api")
 
@@ -62,6 +65,7 @@ class ChatCompletionRequest(BaseModel):
     max_length: Optional[int] = None
     stream: Optional[bool] = False
     discord_friendly: Optional[bool] = False
+    ollama_model: Optional[str] = ""
 
 
 class ChatCompletionResponseChoice(BaseModel):
@@ -116,11 +120,18 @@ async def create_chat_completion(request: ChatCompletionRequest):
         raise HTTPException(status_code=400, detail="Invalid request")
     query = request.messages[-1].content
 
-    generate = predict(query, request.model, request.discord_friendly)
+    generate = predict(
+        query, request.model, request.discord_friendly, request.ollama_model
+    )
     return EventSourceResponse(generate, media_type="text/event-stream")
 
 
-def predict(query: str, model_id: str, discord_friendly: Optional[bool] = False):
+def predict(
+    query: str,
+    model_id: str,
+    discord_friendly: Optional[bool] = False,
+    ollama_model: Optional[str] = "",
+):
     choice_data = ChatCompletionResponseStreamChoice(
         index=0, delta=DeltaMessage(role="assistant"), finish_reason=None
     )
@@ -131,7 +142,12 @@ def predict(query: str, model_id: str, discord_friendly: Optional[bool] = False)
     new_response = ""
     current_length = 0
 
-    for token in ask_internet(query=query, discord_friendly=discord_friendly):
+    for token in ask_internet(
+        query=query,
+        model=model_id,
+        discord_friendly=discord_friendly,
+        ollama_model=ollama_model,
+    ):
         new_response += token
         if len(new_response) == current_length:
             continue
