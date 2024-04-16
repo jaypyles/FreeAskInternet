@@ -6,8 +6,6 @@ services:
     container_name: searchbackend
     depends_on:
       - llm-freegpt35
-    ports:
-      - 8888:8000
     restart: on-failure
     networks:
       - search
