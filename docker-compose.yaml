@@ -4,8 +4,6 @@ services:
     build:
       context: .
     container_name: searchbackend
-    environment:
-      - OLLAMA_HOST=http://ollama:11434
     depends_on:
       - llm-freegpt35
     ports:
