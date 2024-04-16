@@ -76,21 +76,21 @@ Example of how I parse the data being received:
 
 In the docker-compose file, provide the environmental variable `OLLAMA_HOST`
 
-```
-  backend:
-    image: jpyles0524/freeaskinternetapi:latest
-    build:
-      context: .
-    container_name: searchbackend
-    environment:
-      - OLLAMA_HOST=http://ollama:11434
-    depends_on:
-      - llm-freegpt35
-    ports:
-      - 8888:8000
-    restart: on-failure
-    networks:
-      - search
+```yml
+backend:
+  image: jpyles0524/freeaskinternetapi:latest
+  build:
+    context: .
+  container_name: searchbackend
+  environment:
+    - OLLAMA_HOST=http://ollama:11434
+  depends_on:
+    - llm-freegpt35
+  ports:
+    - 8888:8000
+  restart: on-failure
+  networks:
+    - search
 ```
 
 In the request you send to the API, change the model from `gpt3.5` to `ollama`, and provide the Ollama model name:
