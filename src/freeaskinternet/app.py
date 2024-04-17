@@ -44,7 +44,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
 
 def create_response_chunk(
-    model_id: str,
+    model: str,
     content: str = "",
     finish_reason: Optional[Literal["stop", "length"]] = None,
 ):
@@ -54,25 +54,25 @@ def create_response_chunk(
         index=0, delta=delta, finish_reason=finish_reason
     )
     chunk = ChatCompletionResponse(
-        model=model_id, choices=[choice_data], object="chat.completion.chunk"
+        model=model, choices=[choice_data], object="chat.completion.chunk"
     )
     return chunk.model_dump_json(exclude_unset=True)
 
 
 def predict(
     query: str,
-    model_id: str,
+    model: str,
     discord_friendly: Optional[bool] = False,
     ollama_model: Optional[str] = "",
 ):
-    yield create_response_chunk(model_id)
+    yield create_response_chunk(model)
 
     new_response = ""
     current_length = 0
 
     for token in ask_internet(
         query=query,
-        model=model_id,
+        model=model,
         discord_friendly=discord_friendly,
         ollama_model=ollama_model,
     ):
@@ -80,9 +80,9 @@ def predict(
         if len(new_response) > current_length:
             new_text = new_response[current_length:]
             current_length = len(new_response)
-            yield create_response_chunk(model_id, new_text)
+            yield create_response_chunk(model, new_text)
 
-    yield create_response_chunk(model_id, finish_reason="stop")
+    yield create_response_chunk(model, finish_reason="stop")
     yield "[DONE]"
 
 
