@@ -53,3 +53,26 @@ license = {text = "MIT"}
 
 [tool.pdm]
 distribution = false
+
+[tool.pyright]
+include = ["./src/freeaskinternet"]
+exclude = ["**/node_modules", "**/__pycache__"]
+ignore = []
+defineConstant = { DEBUG = true }
+stubPath = ""
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.9"
+pythonPlatform = "Linux"
+
+
+[tool.isort]
+length_sort = "1"
+profile = "black"
+sections = "STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+import_heading_stdlib = "STL"
+import_heading_thirdparty = "PDM"
+import_heading_firstparty = "LOCAL"
+import_heading_localfolder = "LOCAL"
