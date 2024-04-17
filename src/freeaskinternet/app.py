@@ -32,7 +32,6 @@ async def list_models():
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(request: ChatCompletionRequest):
-    global model, tokenizer
     if request.messages[-1].role != "user":
         raise HTTPException(status_code=400, detail="Invalid request")
 
@@ -44,19 +43,30 @@ async def create_chat_completion(request: ChatCompletionRequest):
     return EventSourceResponse(generate, media_type="text/event-stream")
 
 
+def create_response_chunk(
+    model_id: str,
+    content: str = "",
+    finish_reason: Optional[Literal["stop", "length"]] = None,
+):
+    """Helper function to create a formatted response chunk."""
+    delta = DeltaMessage(content=content, role="assistant")
+    choice_data = ChatCompletionResponseStreamChoice(
+        index=0, delta=delta, finish_reason=finish_reason
+    )
+    chunk = ChatCompletionResponse(
+        model=model_id, choices=[choice_data], object="chat.completion.chunk"
+    )
+    return chunk.model_dump_json(exclude_unset=True)
+
+
 def predict(
     query: str,
     model_id: str,
     discord_friendly: Optional[bool] = False,
     ollama_model: Optional[str] = "",
 ):
-    choice_data = ChatCompletionResponseStreamChoice(
-        index=0, delta=DeltaMessage(role="assistant"), finish_reason=None
-    )
-    chunk = ChatCompletionResponse(
-        model=model_id, choices=[choice_data], object="chat.completion.chunk"
-    )
-    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
+    yield create_response_chunk(model_id)
+
     new_response = ""
     current_length = 0
 
@@ -67,29 +77,12 @@ def predict(
         ollama_model=ollama_model,
     ):
         new_response += token
-        if len(new_response) == current_length:
-            continue
+        if len(new_response) > current_length:
+            new_text = new_response[current_length:]
+            current_length = len(new_response)
+            yield create_response_chunk(model_id, new_text)
 
-        new_text = new_response[current_length:]
-        current_length = len(new_response)
-
-        choice_data = ChatCompletionResponseStreamChoice(
-            index=0,
-            delta=DeltaMessage(content=new_text, role="assistant"),
-            finish_reason=None,
-        )
-        chunk = ChatCompletionResponse(
-            model=model_id, choices=[choice_data], object="chat.completion.chunk"
-        )
-        yield "{}".format(chunk.model_dump_json(exclude_unset=True))
-
-    choice_data = ChatCompletionResponseStreamChoice(
-        index=0, delta=DeltaMessage(), finish_reason="stop"
-    )
-    chunk = ChatCompletionResponse(
-        model=model_id, choices=[choice_data], object="chat.completion.chunk"
-    )
-    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
+    yield create_response_chunk(model_id, finish_reason="stop")
     yield "[DONE]"
 
 
@@ -102,20 +95,7 @@ async def get_search_refs(request: QueryRequest):
         search_links, search_results = search_web_ref(request.query)
         for search_item in search_links:
             snippet = search_item.get("snippet")
-            url = search_item.get("url")
-            icon_url = search_item.get("icon_url")
-            site_name = search_item.get("site_name")
-            title = search_item.get("title")
-
-            si = SearchItem(
-                snippet=snippet,
-                url=url,
-                icon_url=icon_url,
-                site_name=site_name,
-                title=title,
-            )
-
-            search_item_list.append(si)
+            search_item_list.append(SearchItem(**snippet))
 
     resp = SearchResp(code=0, msg="success", data=search_item_list)
     return resp
