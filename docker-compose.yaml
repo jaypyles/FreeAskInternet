@@ -9,12 +9,6 @@ services:
     restart: on-failure
     networks:
       - search
-  llm-freegpt35:
-    container_name: llm-freegpt35
-    image: missuo/freegpt35:latest
-    restart: always
-    networks:
-      - search
   searxng:
     image: docker.io/searxng/searxng:latest
     volumes:

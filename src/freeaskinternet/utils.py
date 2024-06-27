@@ -6,6 +6,7 @@ import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 from urllib.parse import urlparse
+from g4f.client import Client
 
 import requests
 import tldextract
@@ -15,6 +16,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 
 LOG = logging.getLogger(__name__)
+client = Client()
 
 
 def extract_url_content(url):
@@ -149,9 +151,10 @@ def gen_prompt(
 
 
 def chat(prompt: str, model: str = "gpt3.5", ollama_model: Optional[str] = ""):
-    GPT_URL = ""
+    gpt_url = ""
+
     if model == "gpt3.5":
-        GPT_URL = "http://llm-freegpt35:3040/v1/chat/completions"
+        gpt_url = "http://llm-freegpt35:3040/v1/chat/completions"
         data = {
             "model": "gpt-3.5-turbo",
             "messages": [{"role": "user", "content": prompt}],
@@ -159,7 +162,7 @@ def chat(prompt: str, model: str = "gpt3.5", ollama_model: Optional[str] = ""):
         }
 
     if model == "ollama":
-        GPT_URL = f"{OLLAMA_HOST}/api/generate"
+        gpt_url = f"{OLLAMA_HOST}/api/generate"
         data = {"model": ollama_model, "prompt": prompt}
 
     headers = {
@@ -167,9 +170,8 @@ def chat(prompt: str, model: str = "gpt3.5", ollama_model: Optional[str] = ""):
         "Authorization": "Bearer a",
     }
 
-    assert GPT_URL
-    response = requests.post(GPT_URL, json=data, headers=headers)
-    response = response.text
+    assert gpt_url
+    response = requests.post(gpt_url, json=data, headers=headers).text
     data_chunks = response.split("\n")
 
     # Clean GPT response
@@ -187,6 +189,14 @@ def chat(prompt: str, model: str = "gpt3.5", ollama_model: Optional[str] = ""):
                 yield token
 
 
+def ask_gpt(prompt: str):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+
 def ask_internet(
     query: str,
     model: str,
@@ -194,18 +204,21 @@ def ask_internet(
     ollama_model: Optional[str] = "",
 ):
     content_list = search_web_ref(query)
+
     prompt = gen_prompt(
         query,
         content_list,
         context_length_limit=6000,
         discord_friendly=discord_friendly,
     )
-    total_token = ""
 
-    for token in chat(prompt=prompt, model=model, ollama_model=ollama_model):
-        if token:
-            total_token += token
-            yield token
+    if model == "gpt3.5":
+        response = ask_gpt(prompt)
+        yield response
+    else:
+        for token in chat(prompt=prompt, model=model, ollama_model=ollama_model):
+            if token:
+                yield token
 
     content_list = content_list[0]
 
@@ -216,6 +229,7 @@ def ask_internet(
         count = 1
 
         iterable_content = content_list
+
         if discord_friendly:
             iterable_content = content_list[:5]
 
